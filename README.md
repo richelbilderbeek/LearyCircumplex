@@ -13,7 +13,7 @@ a questionaire.
 
 ## Downloads
 
- * [Download the Windows executable](richelbilderbeek.nl/ToolLearyCircumplexExe_1_0.zip)
+ * [Download the Windows executable](http://www.richelbilderbeek.nl/ToolLearyCircumplexExe_1_0.zip)
 
 ## Links
 
