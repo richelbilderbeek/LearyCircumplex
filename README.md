@@ -14,7 +14,7 @@ a questionaire.
 ## Downloads
 
  * [Download the Windows executable](http://www.richelbilderbeek.nl/ToolLearyCircumplexExe_1_0.zip)
- * Videos: [YouTube](https://youtu.be/S15O6htUkjw) [ogv](http://richelbilderbeek.nl/leary_circumplex.ogv)
+ * Videos: [YouTube](https://youtu.be/S15O6htUkjw) [ogv](http://www.richelbilderbeek.nl/leary_circumplex.ogv)
 
 ## Links
 
