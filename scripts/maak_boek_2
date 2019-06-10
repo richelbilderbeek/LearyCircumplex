@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Concatenate all Markdown files first, convert those to one PDF
+
+build_folder=build
+
+rm -rf build
+mkdir build
+
+if [ ! -d $build_folder ]; then 
+  echo "Error: failed to create build folder"
+  exit 1
+fi
+
+cp ../hoofdstukken/Voorwoord/*.* $build_folder          ; mv $build_folder/README.md $build_folder/README_00.md
+cp ../hoofdstukken/LineStroke/*.* $build_folder         ; mv $build_folder/README.md $build_folder/README_01.md
+cp ../hoofdstukken/BalEeuwigNaarRechts/*.* $build_folder; mv $build_folder/README.md $build_folder/README_02.md
+cp ../hoofdstukken/RectFill/*.* $build_folder           ; mv $build_folder/README.md $build_folder/README_03.md
+
+cd $build_folder
+
+cat README_00.md >> README.md; echo " " >> README.md; echo "\pagebreak" >> README.md; echo " " >> README.md
+cat README_01.md >> README.md; echo " " >> README.md; echo "\pagebreak" >> README.md; echo " " >> README.md
+cat README_02.md >> README.md; echo " " >> README.md; echo "\pagebreak" >> README.md; echo " " >> README.md
+cat README_03.md >> README.md; echo " " >> README.md; echo "\pagebreak" >> README.md; echo " " >> README.md
+
+pandoc README.md -o Boek_2.pdf --toc --toc-depth=1 --highlight-style=tango -V geometry:margin=0.5in
+mv Boek_2.pdf ../../boeken/Boek_2_zonder_voorpagina.pdf
+
+cd ../../boeken
+pdfunite Boek_voorpagina_2.pdf Boek_2_zonder_voorpagina.pdf Boek_2.pdf
+
+# Make booklet
+bookletimposer -a Boek_2.pdf -o Boekje_2.pdf
+
+rm Boek_2_zonder_voorpagina.pdf
