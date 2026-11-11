@@ -1,7 +1,7 @@
 # LearyCircumplex
 
-[![Build tool](https://github.com/richelbilderbeek/LearyCircumplex/actions/workflows/build_tool.yaml/badge.svg?branch=master)](https://github.com/richelbilderbeek/LearyCircumplex/actions/workflows/build_tool.yaml)
-[![Create Zensical website](https://github.com/richelbilderbeek/LearyCircumplex/actions/workflows/create_zensical_website.yaml/badge.svg?branch=master)](https://github.com/richelbilderbeek/LearyCircumplex/actions/workflows/create_zensical_website.yaml)
+[![Build tool](https://github.com/richelbilderbeek/LearyCircumplex/actions/workflows/build_tool.yaml/badge.svg?branch=main)](https://github.com/richelbilderbeek/LearyCircumplex/actions/workflows/build_tool.yaml)
+[![Create Zensical website](https://github.com/richelbilderbeek/LearyCircumplex/actions/workflows/create_zensical_website.yaml/badge.svg?branch=main)](https://github.com/richelbilderbeek/LearyCircumplex/actions/workflows/create_zensical_website.yaml)
 
 LearyCircumplex is a tool to generate an image of a Leary
 circumplex (also called 'Interpersonal circumplex' or 'Leary circle'
