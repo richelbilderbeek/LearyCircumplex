@@ -26,3 +26,13 @@
 *.exe
 *.out
 *.app
+
+# Qt build artifacts
+Makefile*
+moc_*
+ui_*
+qrc_*
+.qmake.stash
+*.pro.user*
+code/LearyCircumplex
+build*/

@@ -1,7 +1,6 @@
-//---------------------------------------------------------------------------
 /*
   Leary Circumplex, tool to draw a Leary circumplex
-  Copyright (C) 2009  Richel Bilderbeek
+  Copyright (C) 2009-2026  Richel Bilderbeek
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -15,21 +14,16 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-//---------------------------------------------------------------------------
 // From http://www.richelbilderbeek.nl
-//---------------------------------------------------------------------------
-#include <vcl.h>
-#pragma hdrstop
+#include <QApplication>
 
-#include "UnitFormAbout.h"
-//---------------------------------------------------------------------------
-#pragma package(smart_init)
-#pragma resource "*.dfm"
-TFormAbout *FormAbout;
-//---------------------------------------------------------------------------
-__fastcall TFormAbout::TFormAbout(TComponent* Owner)
-        : TForm(Owner)
+#include "qtmaindialog.h"
+
+int main(int argc, char* argv[])
 {
+  QApplication a(argc, argv);
+  a.setApplicationName("Leary Circumplex");
+  QtMainDialog w;
+  w.show();
+  return a.exec();
 }
-//---------------------------------------------------------------------------
-

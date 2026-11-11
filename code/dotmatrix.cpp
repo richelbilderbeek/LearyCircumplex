@@ -1,7 +1,6 @@
-//---------------------------------------------------------------------------
 /*
-  DotMatrix, tool to demonstrate dot-matrix text drawing
-  Copyright (C) 2009  Richel Bilderbeek
+  Leary Circumplex, tool to draw a Leary circumplex
+  Copyright (C) 2009-2026  Richel Bilderbeek
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -12,76 +11,53 @@
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-//---------------------------------------------------------------------------
 // From http://www.richelbilderbeek.nl
-//---------------------------------------------------------------------------
-#pragma hdrstop
+#include "dotmatrix.h"
 
-#include "UnitDotMatrix.h"
-
-//---------------------------------------------------------------------------
 #include <cassert>
-#include <ExtCtrls.hpp>
-//---------------------------------------------------------------------------
-void DotMatrix(
-  Extctrls::TImage * const image,
-  const int x_co,
-  const int y_co,
-  const char c)
-{
-  const boost::array<boost::array<int,5> ,7> v(GetMatrix(c));
 
-  for (int y=0; y!=7; ++y)
+#include <QPainter>
+
+QImage CreateDotMatrixImage(
+  const std::string& s,
+  const int scale,
+  const QColor& foreground,
+  const QColor& background
+)
+{
+  assert(scale >= 1);
+  const int n_chars = static_cast<int>(s.size());
+  const int width = std::max(1, n_chars * 6 * scale);
+  const int height = 8 * scale;
+  QImage image(width, height, QImage::Format_ARGB32_Premultiplied);
+  image.fill(background);
+  QPainter painter(&image);
+  for (int i = 0; i != n_chars; ++i)
   {
-    for (int x=0; x!=5; ++x)
+    const DotMatrixGlyph v = GetMatrix(s[i]);
+    for (int y = 0; y != 7; ++y)
     {
-      const int x1 = x_co + x;
-      const int y1 = y_co + y;
-      if (v[y][x] == 1)
-        SetPixel(image,x1,y1,  0,  0,  0);
-      else
-        SetPixel(image,x1,y1,255,255,255);
+      for (int x = 0; x != 5; ++x)
+      {
+        if (v[y][x] == 1)
+        {
+          painter.fillRect(
+            ((i * 6) + x) * scale, y * scale, scale, scale, foreground
+          );
+        }
+      }
     }
   }
-
+  return image;
 }
-//---------------------------------------------------------------------------
-void DotMatrix(
-  Extctrls::TImage * const image,
-  const int x_co,
-  const int y_co,
-  const std::string& s)
-{
-  const int sz = s.size();
-  for (int x=0; x!=sz; ++x)
-  {
-    DotMatrix(image,x_co + (x*6),y_co,s[x]);
-  }
 
-}
-//---------------------------------------------------------------------------
-void DotMatrix(
-  Extctrls::TImage * const image,
-  const int x_co,
-  const int y_co,
-  const std::vector<std::string>& v)
-{
-  const int n_rows = v.size();
-  for (int y=0; y!=n_rows; ++y)
-  {
-    DotMatrix(image,x_co,y_co+(y*8),v[y]);
-  }
-
-}
-//---------------------------------------------------------------------------
-const boost::array<boost::array<int,5> ,7> GetMatrix(const char c)
+DotMatrixGlyph GetMatrix(const char c)
 {
   //Create a 5 (width) x 7 (height) 2D array
-  boost::array<boost::array<int,5> ,7> v;
+  DotMatrixGlyph v{};
 
   switch(c)
   {
@@ -955,80 +931,3 @@ const boost::array<boost::array<int,5> ,7> GetMatrix(const char c)
   }
   return v;
 }
-//---------------------------------------------------------------------------
-//Set a pixel's RGB values
-//From http://www.richelbilderbeek.nl
-void SetPixel(
-  Extctrls::TImage * const image,
-  const int x,
-  const int y,
-  const unsigned char red,
-  const unsigned char green,
-  const unsigned char blue)
-{
-  assert(image!=0 && "Image is NULL");
-  assert(image->Picture->Bitmap!=0 && "Bitmap is NULL");
-  assert(image->Picture->Bitmap->PixelFormat == pf24bit && "Bitmap must be 24 bit");
-  assert( x >= 0 && "x coordinat is below zero");
-  assert( y >= 0 && "y coordinat is below zero");
-  assert( x < image->Picture->Bitmap->Width  && "x coordinat is beyond image width");
-  assert( y < image->Picture->Bitmap->Height && "y coordinat is beyond image height");
-
-  unsigned char * const line
-    = static_cast<unsigned char *>(image->Picture->Bitmap->ScanLine[y]);
-
-  line[x*3+2] = red;
-  line[x*3+1] = green;
-  line[x*3+0] = blue;
-}
-//---------------------------------------------------------------------------
-//Set a line of pixels' RGB values
-//From http://www.richelbilderbeek.nl
-void SetPixel(
-  Extctrls::TImage * const image,
-  const int x1,
-  const int x2,
-  const int y,
-  const unsigned char red,
-  const unsigned char green,
-  const unsigned char blue)
-{
-  assert(image!=0 && "Image is NULL");
-  assert(image->Picture->Bitmap!=0 && "Bitmap is NULL");
-  assert(image->Picture->Bitmap->PixelFormat == pf24bit && "Bitmap must be 24 bit");
-  assert( x1 >= 0 && "x1 coordinat is below zero");
-  assert( x2 >= 0 && "x2 coordinat is below zero");
-  assert( y >= 0 && "y coordinat is below zero");
-  assert( x1 < image->Picture->Bitmap->Width  && "x1 coordinat is beyond image width");
-  assert( x2 <= image->Picture->Bitmap->Width  && "x2 coordinat is beyond image width");
-  assert( y < image->Picture->Bitmap->Height && "y coordinat is beyond image height");
-
-  unsigned char * const myLine
-    = static_cast<unsigned char *>(image->Picture->Bitmap->ScanLine[y]);
-  for (int x=x1; x!=x2; ++x)
-  {
-    myLine[x*3+2] = red;
-    myLine[x*3+1] = green;
-    myLine[x*3+0] = blue;
-  }
-}
-//---------------------------------------------------------------------------
-//Set a square of pixels' RGB values
-//From http://www.richelbilderbeek.nl
-void SetPixel(
-  Extctrls::TImage * const image,
-  const int x1,
-  const int y1,
-  const int x2,
-  const int y2,
-  const unsigned char red,
-  const unsigned char green,
-  const unsigned char blue)
-{
-  for (int y=y1; y!=y2; ++y)
-  {
-    SetPixel(image,x1,x2,y,red,green,blue);
-  }
-}
-//---------------------------------------------------------------------------
-#pragma package(smart_init)

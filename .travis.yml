@@ -1,13 +1,18 @@
-language: generic
+language: cpp
 dist: bionic
+compiler: gcc
 
 install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq qtbase5-dev qt5-qmake
   # Check dead links
   - sudo apt-get install -qq npm
   - npm config set strict-ssl false
   - sudo npm install -g markdown-link-check
 
 script: 
+  # Build the Qt tool
+  - cd code && qmake LearyCircumplex.pro && make && cd ..
   # Check dead links
   - rm .travis.yml
   - ./scripts/check_dead_links
