@@ -1,0 +1,148 @@
+# Build the Linux, Windows and WebAssembly versions of the tool
+#
+# All versions are uploaded as artifacts of this workflow.
+# This workflow is also called by create_zensical_website.yaml,
+# which puts the WebAssembly and Windows versions on the website.
+name: Build tool
+
+on:
+  push:
+  pull_request:
+  workflow_call:
+
+env:
+  # A version of Qt only works with one version of Emscripten, see
+  # https://doc.qt.io/qt-6/wasm.html#installing-emscripten
+  QT_VERSION: 6.8.3
+  EMSCRIPTEN_VERSION: 3.1.56
+
+jobs:
+  build_desktop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          cache: true
+
+      - run: qmake LearyCircumplex.pro
+        working-directory: code
+      - run: make --silent
+        working-directory: code
+
+      - name: The tool must start and keep running
+        working-directory: code
+        run: |
+          status=0
+          QT_QPA_PLATFORM=offscreen timeout 5 ./LearyCircumplex || status=$?
+          test "${status}" -eq 124
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: learycircumplex_desktop
+          path: code/LearyCircumplex
+          if-no-files-found: error
+
+  build_windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: win64_msvc2022_64
+          cache: true
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - run: qmake LearyCircumplex.pro
+        working-directory: code
+      - run: nmake /nologo
+        working-directory: code
+
+      - name: Collect the files needed to run the tool
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory learycircumplex_windows
+          Copy-Item code/release/LearyCircumplex.exe learycircumplex_windows/
+          windeployqt --release --no-translations --no-system-d3d-compiler --no-opengl-sw learycircumplex_windows/LearyCircumplex.exe
+          Get-ChildItem "$env:VCToolsRedistDir/x64/Microsoft.VC*.CRT/*.dll" | Copy-Item -Destination learycircumplex_windows/
+
+      - name: The tool must start and keep running without Qt being installed
+        shell: pwsh
+        run: |
+          $env:PATH = "C:\Windows\System32;C:\Windows"
+          Remove-Item Env:QT_PLUGIN_PATH, Env:QML2_IMPORT_PATH -ErrorAction Ignore
+          $tool = Start-Process -PassThru -FilePath learycircumplex_windows/LearyCircumplex.exe
+          Start-Sleep -Seconds 5
+          if ($tool.HasExited) { exit 1 }
+          Stop-Process -Id $tool.Id
+          Get-ChildItem learycircumplex_windows -Name
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: learycircumplex_windows
+          path: learycircumplex_windows
+          if-no-files-found: error
+
+  build_wasm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: all_os
+          target: wasm
+          arch: wasm_singlethread
+          cache: true
+
+      - uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: ${{ env.EMSCRIPTEN_VERSION }}
+
+      - run: qmake LearyCircumplex.pro
+        working-directory: code
+      - run: make --silent
+        working-directory: code
+
+      - name: Collect the files needed to run the tool
+        run: |
+          mkdir wasm
+          cd code
+          cp LearyCircumplex.html LearyCircumplex.js LearyCircumplex.wasm qtloader.js qtlogo.svg ../wasm/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: learycircumplex_wasm
+          path: wasm
+          if-no-files-found: error
+
+  test_use_page:
+    needs: build_wasm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: learycircumplex_wasm
+          path: docs/app
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+
+      - run: pip install pillow playwright zensical
+      - run: playwright install --with-deps chromium
+      - run: zensical build --clean --strict
+
+      - name: Use the tool on the website
+        run: |
+          python -m http.server 8000 --directory site &
+          sleep 1
+          python scripts/test_use_page.py http://localhost:8000/use/

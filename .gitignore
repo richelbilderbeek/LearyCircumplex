@@ -36,3 +36,8 @@ qrc_*
 *.pro.user*
 code/LearyCircumplex
 build*/
+
+# Generated when building the website
+/docs/learycircumplex_windows.zip
+/docs/app/
+/site/

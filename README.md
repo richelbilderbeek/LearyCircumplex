@@ -1,21 +1,24 @@
 # LearyCircumplex
 
-Branch|[![Travis CI logo](pics/TravisCI.png)](https://travis-ci.org)
----|---
-`master`|[![Build Status](https://travis-ci.org/richelbilderbeek/LearyCircumplex.svg?branch=master)](https://travis-ci.org/richelbilderbeek/LearyCircumplex)
+[![Build tool](https://github.com/richelbilderbeek/LearyCircumplex/actions/workflows/build_tool.yaml/badge.svg?branch=master)](https://github.com/richelbilderbeek/LearyCircumplex/actions/workflows/build_tool.yaml)
+[![Create Zensical website](https://github.com/richelbilderbeek/LearyCircumplex/actions/workflows/create_zensical_website.yaml/badge.svg?branch=master)](https://github.com/richelbilderbeek/LearyCircumplex/actions/workflows/create_zensical_website.yaml)
 
-LearyCircumplex is a tool to generate an image of a Leary 
-circumplex (also called 'Interpersonal circumplex' or 'Leary circle' 
-or (in Dutch) 'Roos van Leary') after having scored the results of 
-a questionaire. 
+LearyCircumplex is a tool to generate an image of a Leary
+circumplex (also called 'Interpersonal circumplex' or 'Leary circle'
+or (in Dutch) 'Roos van Leary') after having scored the results of
+a questionnaire.
 
-![](pics/ToolLearyCircumplex_1_0.png)
+![Leary circumplex](docs/example_default.png)
+
+- [Website](https://richelbilderbeek.github.io/LearyCircumplex/):
+  use the tool in your web browser, see examples, download the Windows version
+- Video of version 1.0: [YouTube](https://youtu.be/S15O6htUkjw)
 
 ## Build
 
 The tool uses C++ and the Qt (5 or 6) libraries:
 
-```
+```bash
 cd code
 qmake LearyCircumplex.pro
 make
@@ -24,11 +27,16 @@ make
 
 Version 1.0 used C++ Builder and its VCL library.
 
-## Downloads
+## Website
 
- * [Download the Windows executable](http://www.richelbilderbeek.nl/ToolLearyCircumplexExe_1_0.zip)
- * Videos: [YouTube](https://youtu.be/S15O6htUkjw) [ogv](http://www.richelbilderbeek.nl/leary_circumplex.ogv)
+The website is built with [Zensical](https://zensical.org) from the `docs` folder.
+To view it locally:
+
+```bash
+pip install zensical
+zensical serve
+```
 
 ## Links
 
- * [Wikipedia's page on 'Interpersonal Circumplex'](http://en.wikipedia.org/wiki/Interpersonal_Circumplex)
+- [Wikipedia's page on 'Interpersonal circumplex'](https://en.wikipedia.org/wiki/Interpersonal_circumplex)

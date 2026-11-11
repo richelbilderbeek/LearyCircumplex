@@ -21,6 +21,8 @@
 #include <string>
 #include <utility>
 
+#include <QBuffer>
+#include <QByteArray>
 #include <QFileDialog>
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -32,6 +34,23 @@
 #include "learycircumplex.h"
 #include "qtaboutdialog.h"
 #include "qtdrawdialog.h"
+
+namespace {
+
+/// Show a message box without blocking.
+/// A blocking (nested) event loop does not work in a web browser
+void ShowMessage(
+  QWidget* const parent,
+  const QMessageBox::Icon icon,
+  const QString& title,
+  const QString& text)
+{
+  QMessageBox* const box = new QMessageBox(icon, title, text, QMessageBox::Ok, parent);
+  box->setAttribute(Qt::WA_DeleteOnClose);
+  box->open();
+}
+
+} // namespace
 
 QtMainDialog::QtMainDialog(QWidget* parent)
   : QDialog(parent),
@@ -89,8 +108,9 @@ void QtMainDialog::OnDraw()
       : 0.0;
     if (!ok || score < 0.0 || score > 10.0)
     {
-      QMessageBox::warning(
+      ShowMessage(
         this,
+        QMessageBox::Warning,
         "Invalid score",
         QString("Score on row %1 must be a number from 0.0 to 10.0").arg(i + 1)
       );
@@ -99,6 +119,8 @@ void QtMainDialog::OnDraw()
     scores[i] = score / 10.0; //In the Netherlands, scores range from [0.0,10.0]
   }
   m_draw_dialog = std::make_unique<QtDrawDialog>(scores, legend);
+  //Put the drawing next to this dialog
+  m_draw_dialog->move(frameGeometry().right() + 10, frameGeometry().top());
   m_draw_dialog->show();
 }
 
@@ -106,9 +128,22 @@ void QtMainDialog::OnSave()
 {
   if (!m_draw_dialog)
   {
-    QMessageBox::information(this, "Nothing to save", "Please draw a Leary circumplex first");
+    ShowMessage(
+      this,
+      QMessageBox::Information,
+      "Nothing to save",
+      "Please draw a Leary circumplex first"
+    );
     return;
   }
+#ifdef Q_OS_WASM
+  //In a web browser, let the browser download the image
+  QByteArray data;
+  QBuffer buffer(&data);
+  buffer.open(QIODevice::WriteOnly);
+  m_draw_dialog->GetImage().save(&buffer, "PNG");
+  QFileDialog::saveFileContent(data, "leary_circumplex.png");
+#else
   const QString filename = QFileDialog::getSaveFileName(
     this,
     "Please select a filename to save your Leary Circumplex",
@@ -118,14 +153,21 @@ void QtMainDialog::OnSave()
   if (filename.isEmpty()) return;
   if (!m_draw_dialog->GetImage().save(filename))
   {
-    QMessageBox::warning(this, "Save failed", "Could not save image as " + filename);
+    ShowMessage(
+      this,
+      QMessageBox::Warning,
+      "Save failed",
+      "Could not save image as " + filename
+    );
     return;
   }
-  QMessageBox::information(this, "Saved", "Image saved as " + filename);
+  ShowMessage(this, QMessageBox::Information, "Saved", "Image saved as " + filename);
+#endif
 }
 
 void QtMainDialog::OnAbout()
 {
-  QtAboutDialog d(this);
-  d.exec();
+  QtAboutDialog* const d = new QtAboutDialog(this);
+  d->setAttribute(Qt::WA_DeleteOnClose);
+  d->open();
 }

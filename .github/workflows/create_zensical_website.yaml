@@ -1,0 +1,54 @@
+# Adapted from https://zensical.org/docs/publish-your-site/#with-github-actions
+name: Create Zensical website
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - .github/workflows/build_tool.yaml
+      - .github/workflows/create_zensical_website.yaml
+      - 'code/**'
+      - 'docs/**'
+      - zensical.toml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build_tool:
+    uses: ./.github/workflows/build_tool.yaml
+
+  create_zensical_website:
+    needs: build_tool
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: learycircumplex_wasm
+          path: docs/app
+      - uses: actions/download-artifact@v4
+        with:
+          name: learycircumplex_windows
+          path: learycircumplex_windows
+      - run: zip -r docs/learycircumplex_windows.zip learycircumplex_windows
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+      - run: pip install zensical
+      - run: zensical build --clean --strict
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
