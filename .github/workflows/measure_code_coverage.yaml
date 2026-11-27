@@ -1,0 +1,48 @@
+# Measure the code coverage and upload it to Codecov
+name: Measure code coverage
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/measure_code_coverage.yaml
+      - "**.cpp"
+      - "**.h"
+      - "**.pro"
+      - "**.pri"
+      - "**.ui"
+      - "**.qrc"
+      - download_other_githubs
+      - scripts/measure_code_coverage.sh
+  pull_request:
+    paths:
+      - .github/workflows/measure_code_coverage.yaml
+      - "**.cpp"
+      - "**.h"
+      - "**.pro"
+      - "**.pri"
+      - "**.ui"
+      - "**.qrc"
+      - download_other_githubs
+      - scripts/measure_code_coverage.sh
+
+jobs:
+  measure_code_coverage:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Qt, Qwt and Boost
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qtbase5-dev qt5-qmake libqt5svg5-dev libqt5opengl5-dev libqwt-qt5-dev libboost-all-dev
+
+      - name: Build all projects and measure code coverage
+        run: QT_QPA_PLATFORM=offscreen ./scripts/measure_code_coverage.sh
+
+      - name: Upload code coverage
+        uses: codecov/codecov-action@v5
+        with:
+          directory: coverage
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false

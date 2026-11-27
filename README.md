@@ -1,5 +1,7 @@
 # LearyCircumplex
 
+[![Codecov](https://codecov.io/gh/richelbilderbeek/LearyCircumplex/branch/main/graph/badge.svg)](https://codecov.io/gh/richelbilderbeek/LearyCircumplex)
+
 [![Build tool](https://github.com/richelbilderbeek/LearyCircumplex/actions/workflows/build_tool.yaml/badge.svg?branch=main)](https://github.com/richelbilderbeek/LearyCircumplex/actions/workflows/build_tool.yaml)
 [![Create Zensical website](https://github.com/richelbilderbeek/LearyCircumplex/actions/workflows/create_zensical_website.yaml/badge.svg?branch=main)](https://github.com/richelbilderbeek/LearyCircumplex/actions/workflows/create_zensical_website.yaml)
 
